@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal Trah Silsilah & Komunikasi Keluarga</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --primary-color: #1b4332;
+      --secondary-color: #2d6a4f;
+      --accent-color: #52b788;
+      --bg-body: #f7faf8;
+    }
+    body {
+      background-color: var(--bg-body);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      color: #2b2d42;
+    }
+    .bg-custom-header {
+      background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+    }
+    .auth-bg {
+      min-height: 100vh;
+      background: radial-gradient(circle at top right, #2d6a4f 0%, #081c15 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: #ffffff;
+      border-radius: 1.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .family-card {
+      border: 1px solid #e9ecef;
+      border-radius: 1.15rem;
+      background: #ffffff;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .family-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(45, 106, 79, 0.12);
+      border-color: #74c69d;
+    }
+    .avatar-container {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+    }
+    .avatar-wrap {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid #b7e4c7;
+      object-fit: cover;
+      background-color: #edf2f7;
+    }
+    .btn-change-photo {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .clickable-badge {
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .clickable-badge:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+    .chat-box {
+      height: 420px;
+      overflow-y: auto;
+      background: #eef2ef;
+      border-radius: 0.85rem;
+      padding: 1rem;
+    }
+    .chat-bubble {
+      max-width: 78%;
+      padding: 0.65rem 1rem;
+      border-radius: 1rem;
+      margin-bottom: 0.65rem;
+      font-size: 0.92rem;
+    }
+    .chat-left {
+      background: #ffffff;
+      align-self: flex-start;
+      border-bottom-left-radius: 0.2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .chat-right {
+      background: #d8f3dc;
+      color: #081c15;
+      align-self: flex-end;
+      border-bottom-right-radius: 0.2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .gallery-img {
+      height: 190px;
+      object-fit: cover;
+      width: 100%;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+    }
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.9);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .tree-node {
+      border: 2px solid #52b788;
+      border-radius: 1.15rem;
+      padding: 1rem;
+      background: #ffffff;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+      min-width: 250px;
+      text-align: center;
+      position: relative;
+    }
+    .tree-avatar-container {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 0.5rem auto;
+    }
+    .tree-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 2px solid #52b788;
+      object-fit: cover;
+    }
+    .tree-line {
+      width: 2px;
+      background-color: #74c69d;
+      margin: 0 auto;
+      height: 25px;
+    }
+    .comment-item {
+      background: #f8f9fa;
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay">
+    <div class="spinner-border text-success" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
+    <div class="mt-3 fw-bold text-dark fs-6" id="loadingText">Menghubungkan ke Portal Trah Keluarga...</div>
+  </div>
+
+  <!-- AUTH / LOGIN CONTAINER -->
+  <div id="authContainer" class="auth-bg">
+    <div class="auth-card p-4 p-md-5">
+      <div class="text-center mb-4">
+        <div class="d-inline-flex p-3 rounded-circle bg-success-subtle text-success mb-2 shadow-sm">
+          <i class="bi bi-diagram-3-fill fs-1"></i>
+        </div>
+        <h4 class="fw-bold text-dark mb-1">PORTAL KELUARGA BESAR</h4>
+        <p class="text-muted small">Silsilah Keturunan, Kabar Trah, & Kegiatan Bersama</p>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small fw-semibold text-secondary">Username</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+          <input type="text" id="loginUsername" class="form-control" value="admin" placeholder="Masukkan username">
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label small fw-semibold text-secondary">Password</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="bi bi-shield-lock"></i></span>
+          <input type="password" id="loginPassword" class="form-control" value="keluarga123" placeholder="Masukkan password">
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-success w-100 py-2 fw-bold shadow-sm mb-3" onclick="executeLogin()">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Masuk ke Portal
+      </button>
+
+      <div class="bg-light p-3 rounded-3 border text-center small">
+        <div class="fw-bold text-secondary mb-1">Informasi Akun Default:</div>
+        <div>Admin: <strong class="text-dark">admin</strong> | Sandi: <strong class="text-dark">keluarga123</strong></div>
+        <div>Anggota: <strong class="text-dark">keluarga</strong> | Sandi: <strong class="text-dark">123456</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <div id="mainApp" style="display: none;">
+    <!-- Main Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-custom-header sticky-top shadow-sm py-2">
+      <div class="container-fluid px-3 px-md-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+          <i class="bi bi-diagram-3"></i>
+          <span>Trah Keluarga Besar</span>
+        </a>
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge bg-light text-success fw-bold px-3 py-2 rounded-pill shadow-sm">
+            <i class="bi bi-person-check-fill me-1"></i> <span id="userBadgeName">Pengguna</span>
+            <span class="text-muted ms-1 fw-normal" id="userBadgeRole">(Admin)</span>
+          </span>
+          <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="logoutUser()">
+            <i class="bi bi-box-arrow-right"></i> Keluar
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Sub-Navbar Navigation Pills -->
+    <div class="bg-white border-bottom shadow-sm">
+      <div class="container-fluid px-3 px-md-4 pt-3">
+        <ul class="nav nav-pills gap-2 pb-3 overflow-x-auto flex-nowrap" id="familyTabs">
+          <li class="nav-item">
+            <button class="nav-link active fw-semibold text-nowrap" onclick="switchView('silsilah', this)">
+              <i class="bi bi-people-fill me-1"></i> Silsilah & Kartu Anggota
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-semibold text-nowrap" onclick="switchView('tree', this)">
+              <i class="bi bi-diagram-2 me-1"></i> Bagan Pohon Turunan
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-semibold text-nowrap" onclick="switchView('feed', this)">
+              <i class="bi bi-newspaper me-1"></i> Linimasa & Kabar
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-semibold text-nowrap" onclick="switchView('kegiatan', this)">
+              <i class="bi bi-calendar-event me-1"></i> Arisan, Keagamaan & Aktivitas Lain
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-semibold text-nowrap" onclick="switchView('galeri', this)">
+              <i class="bi bi-images me-1"></i> Galeri Foto
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-semibold text-nowrap" onclick="switchView('komunitas', this)">
+              <i class="bi bi-collection me-1"></i> Komunitas & Minat
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-semibold text-nowrap" onclick="switchView('chat', this)">
+              <i class="bi bi-chat-dots-fill me-1"></i> Obrolan Grup
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="container-fluid px-3 px-md-4 py-4">
+
+      <!-- 1. VIEW SILSILAH & KARTU ANGGOTA -->
+      <section id="view-silsilah">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+          <div>
+            <h4 class="fw-bold text-dark mb-1">Direktori Anggota Trah</h4>
+            <p class="text-muted small mb-0">Klik pada alamat atau riwayat untuk melihat informasi lengkap setiap sanak saudara.</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <select id="filterGenerasi" class="form-select form-select-sm w-auto" onchange="renderSilsilah()">
+              <option value="">Semua Generasi</option>
+              <option value="1">Generasi 1 (Sesepuh)</option>
+              <option value="2">Generasi 2 (Anak)</option>
+              <option value="3">Generasi 3 (Cucu)</option>
+              <option value="4">Generasi 4 (Cicit)</option>
+            </select>
+            <input type="text" id="searchAnggota" class="form-control form-control-sm" style="min-width: 220px;" placeholder="Cari nama, profesi, bisnis..." oninput="renderSilsilah()">
+            <button class="btn btn-success btn-sm fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#modalAddAnggota">
+              <i class="bi bi-person-plus-fill me-1"></i> Tambah Anggota
+            </button>
+          </div>
+        </div>
+        <div class="row g-3" id="silsilahGrid"></div>
+      </section>
+
+      <!-- 2. VIEW BAGAN POHON TURUNAN -->
+      <section id="view-tree" style="display: none;">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+              <h5 class="fw-bold text-dark mb-1"><i class="bi bi-diagram-3-fill text-success me-2"></i>Bagan Pohon Silsilah Trah</h5>
+              <p class="text-muted small mb-0">Hierarki hubungan turun-temurun dilengkapi foto profil interaktif dan tombol ubah foto.</p>
+            </div>
+            <button class="btn btn-outline-success btn-sm rounded-pill" onclick="renderTree()">
+              <i class="bi bi-arrow-clockwise me-1"></i> Refresh Bagan
+            </button>
+          </div>
+          <div id="treeContainer" class="d-flex flex-column align-items-center gap-2 overflow-x-auto py-3"></div>
+        </div>
+      </section>
+
+      <!-- 3. VIEW LINIMASA & KABAR STATUS -->
+      <section id="view-feed" style="display: none;">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+              <div class="card-body p-4">
+                <div class="d-flex gap-3 mb-3">
+                  <i class="bi bi-pencil-square fs-3 text-success"></i>
+                  <div class="w-100">
+                    <textarea id="feedContent" class="form-control border-0 bg-light rounded-3" rows="3" placeholder="Bagikan kabar gembira, lelucon humor, atau info kegiatan keluarga..."></textarea>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                  <select id="feedCategory" class="form-select form-select-sm w-auto">
+                    <option value="Aktivitas & Usaha">Aktivitas & Usaha</option>
+                    <option value="Kabar">Kabar</option>
+                    <option value="Humor">Humor</option>
+                  </select>
+                  <button class="btn btn-success btn-sm px-4 fw-semibold" onclick="submitFeed()">
+                    <i class="bi bi-send-fill me-1"></i> Terbitkan Status
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="feedList" class="d-flex flex-column gap-3"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. VIEW Arisan, Keagamaan & Aktivitas Lain -->
+      <section id="view-kegiatan" style="display: none;">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold text-dark mb-0"><i class="bi bi-calendar-check-fill text-success me-2"></i>Agenda Arisan, Keagamaan & Aktivitas Lain</h5>
+              <button class="btn btn-sm btn-outline-success rounded-pill fw-semibold" data-bs-toggle="modal" data-bs-target="#modalAddKegiatan">
+                <i class="bi bi-plus-circle me-1"></i> Buat Acara Baru
+              </button>
+            </div>
+            <div class="d-flex flex-column gap-3" id="kegiatanList"></div>
+          </div>
+          <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+              <div class="card-header bg-white border-0 pt-4 px-4">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-check2-circle text-success me-2"></i>Form RSVP / Kehadiran</h5>
+                <small class="text-muted">Konfirmasi keikutsertaan acara keluarga</small>
+              </div>
+              <div class="card-body px-4 pb-4">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Pilih Kegiatan</label>
+                  <select id="rsvpEventSelect" class="form-select"></select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Nama Peserta / Perwakilan</label>
+                  <input type="text" id="rsvpNama" class="form-control" placeholder="Contoh: Yudho Purwoko">
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold">Kehadiran</label>
+                    <select id="rsvpStatus" class="form-select">
+                      <option value="Hadir">Pasti Hadir</option>
+                      <option value="Mungkin">Mungkin Hadir</option>
+                      <option value="Berhalangan">Izin Berhalangan</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold">Jumlah Orang</label>
+                    <input type="number" id="rsvpJumlah" class="form-control" value="1" min="1">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Catatan Tambahan</label>
+                  <input type="text" id="rsvpCatatan" class="form-control" placeholder="Bawa konsumsi / titip iuran kas">
+                </div>
+                <button class="btn btn-success w-100 fw-bold" onclick="submitRSVP()">
+                  <i class="bi bi-send-check me-1"></i> Kirim Konfirmasi
+                </button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+              <h6 class="fw-bold text-dark mb-2"><i class="bi bi-trophy-fill text-warning me-1"></i> Undian Kocokan Arisan</h6>
+              <p class="text-muted small mb-3">Putar nama penerima arisan secara acak dan adil di hadapan keluarga!</p>
+              <div class="p-3 bg-light rounded-3 fw-bold fs-5 text-success mb-3 border" id="arisanWinnerBox">
+                Siap Diputar...
+              </div>
+              <button class="btn btn-outline-success fw-bold rounded-pill" onclick="spinArisan()">
+                <i class="bi bi-arrow-repeat me-1"></i> Putar Undian Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. VIEW GALERI FOTO KELUARGA -->
+      <section id="view-galeri" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h4 class="fw-bold text-dark mb-1">Galeri Kenangan & Dokumentasi</h4>
+            <p class="text-muted small mb-0">Kumpulan momen foto berharga, liburan, halal bihalal, dan syukuran.</p>
+          </div>
+          <button class="btn btn-success btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalAddGaleri">
+            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Tambah Foto Kenangan
+          </button>
+        </div>
+        <div class="row g-4" id="galeriGrid"></div>
+      </section>
+
+      <!-- 6. VIEW KOMUNITAS & MINAT -->
+      <section id="view-komunitas" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h4 class="fw-bold text-dark mb-1">Komunitas & Minat Bersama</h4>
+            <p class="text-muted small mb-0">Wadah minat hobi, olahraga, keagamaan, dan jaringan bisnis keluarga.</p>
+          </div>
+        </div>
+        <div class="row g-3" id="komunitasGrid"></div>
+      </section>
+
+      <!-- 7. VIEW OBROLAN GRUP -->
+      <section id="view-chat" style="display: none;">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+              <div class="card-header bg-custom-header text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                <div class="fw-bold"><i class="bi bi-chat-square-dots-fill me-2"></i>Kanal Obrolan Trah Keluarga</div>
+                <span class="badge bg-light text-success fw-bold">Live Room</span>
+              </div>
+              <div class="card-body p-3">
+                <div class="chat-box d-flex flex-column" id="chatMessages"></div>
+                <div class="input-group mt-3">
+                  <input type="text" id="chatInput" class="form-control" placeholder="Tulis pesan untuk keluarga..." onkeydown="if(event.key==='Enter') sendChat()">
+                  <button class="btn btn-success px-4" onclick="sendChat()">
+                    <i class="bi bi-send-fill"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- DATALIST AUTOCOMPLETE NAMA KELUARGA -->
+  <datalist id="listAyah"></datalist>
+  <datalist id="listPasangan"></datalist>
+
+  <!-- MODAL: GANTI FOTO PROFIL (FILE KOMPUTER & URL) -->
+  <div class="modal fade" id="modalGantiFoto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header bg-custom-header text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-camera-fill me-2"></i>Ganti Foto Profil Anggota</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+          <input type="hidden" id="gantiFotoId">
+          <img id="gantiFotoPreview" src="" class="rounded-circle border border-success border-3 mb-3 shadow-sm" style="width: 110px; height: 110px; object-fit: cover;">
+          <h6 class="fw-bold text-dark mb-3" id="gantiFotoNama">-</h6>
+          
+          <div class="mb-3 text-start">
+            <label class="form-label small fw-semibold">Pilih Berkas Foto dari Komputer / HP</label>
+            <input type="file" id="fileGantiFoto" class="form-control" accept="image/*" onchange="previewUploadImage(this, 'gantiFotoPreview')">
+          </div>
+          <div class="mb-3 text-start">
+            <label class="form-label small fw-semibold text-muted">Atau Gunakan Tautan URL Web</label>
+            <input type="url" id="gantiFotoUrlInput" class="form-control form-control-sm" placeholder="https://..." oninput="document.getElementById('gantiFotoPreview').src = this.value">
+          </div>
+          <button type="button" class="btn btn-success w-100 fw-bold" onclick="submitGantiFoto()">
+            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Simpan Foto Profil
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH ANGGOTA KELUARGA -->
+  <div class="modal fade" id="modalAddAnggota" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header bg-custom-header text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Tambah Anggota Trah Baru</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formAddAnggota" onsubmit="event.preventDefault(); submitAnggota();">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Nama Lengkap & Gelar</label>
+                <input type="text" id="inNama" class="form-control" required placeholder="Contoh: Ahmad Sanusi, M.M.">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Jenis Kelamin</label>
+                <select id="inGender" class="form-select" onchange="handleGenderChange('in')">
+                  <option value="L">Laki-laki</option>
+                  <option value="P">Perempuan</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Generasi Ke-</label>
+                <input type="number" id="inGenerasi" class="form-control" value="2" min="1" max="10">
+              </div>
+
+              <!-- BARIS SILSILAH: NAMA AYAH & URUTAN ANAK -->
+              <div class="col-md-7">
+                <label class="form-label small fw-semibold">Anak Dari (Nama Ayah)</label>
+                <input type="text" id="inAyah" class="form-control" list="listAyah" placeholder="Ketik nama ayah kandung..." oninput="handleAyahInput('in')">
+              </div>
+              <div class="col-md-5" id="inColAnakKe" style="display: none;">
+                <label class="form-label small fw-semibold">Anak Ke- (Urutan Lahir)</label>
+                <select id="inAnakKe" class="form-select">
+                  <option value="">-- Pilih Urutan Anak --</option>
+                </select>
+              </div>
+
+              <!-- BARIS PASANGAN DINAMIS & TANGGAL LAHIR -->
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold" id="lblInPasangan">Istri Dari (Opsional)</label>
+                <input type="text" id="inPasangan" class="form-control" list="listPasangan" placeholder="Ketik 1-2 huruf nama pasangan...">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Tanggal Lahir</label>
+                <input type="date" id="inTglLahir" class="form-control" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Alamat Ringkas (Kota/Daerah)</label>
+                <input type="text" id="inAlamatRingkas" class="form-control" required placeholder="Contoh: Bandung, Jawa Barat">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Profesi / Pekerjaan Utama</label>
+                <input type="text" id="inPekerjaan" class="form-control" required placeholder="Contoh: Dosen, Akuntan, Pebisnis">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Alamat Lengkap</label>
+                <textarea id="inAlamatLengkap" class="form-control" rows="2" required placeholder="Jalan, No Rumah, RT/RW, Kelurahan, Kecamatan..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Keistimewaan Khusus</label>
+                <input type="text" id="inKeistimewaan" class="form-control" required placeholder="Keahlian, bakat istimewa, atau karakter menonjol">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Bisnis / Usaha Mandiri</label>
+                <input type="text" id="inBisnis" class="form-control" placeholder="Nama bisnis atau unit usaha (jika ada)">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Riwayat Ringkas (Muncul di kartu depan)</label>
+                <input type="text" id="inRiwayatRingkas" class="form-control" required placeholder="Satu kalimat ringkasan peran dalam keluarga">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Riwayat Lengkap (Muncul saat diklik)</label>
+                <textarea id="inRiwayatLengkap" class="form-control" rows="3" required placeholder="Tuliskan kisah hidup inspiratif, pengabdian, dan latar belakang keluarga..."></textarea>
+              </div>
+
+              <!-- UPLOAD FOTO PROFIL KOMPUTER / HP -->
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Foto Profil Anggota (Upload File Komputer / HP)</label>
+                <input type="file" id="inFotoFile" class="form-control" accept="image/*" onchange="previewUploadImage(this, 'inFotoPreview')">
+                <div class="mt-2 d-flex align-items-center gap-2">
+                  <img id="inFotoPreview" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200" class="rounded-circle border border-2 border-success" style="width: 50px; height: 50px; object-fit: cover;">
+                  <small class="text-muted">Format JPG, PNG, atau WEBP. Jika dikosongkan akan menggunakan foto standar.</small>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 text-end">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-success px-4 fw-bold">Simpan Anggota</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT DATA ANGGOTA KELUARGA -->
+  <div class="modal fade" id="modalEditAnggota" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header bg-custom-header text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Informasi Anggota Keluarga</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formEditAnggota" onsubmit="event.preventDefault(); submitUpdateAnggota();">
+            <input type="hidden" id="editId">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Nama Lengkap & Gelar</label>
+                <input type="text" id="editNama" class="form-control" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Jenis Kelamin</label>
+                <select id="editGender" class="form-select" onchange="handleGenderChange('edit')">
+                  <option value="L">Laki-laki</option>
+                  <option value="P">Perempuan</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Generasi Ke-</label>
+                <input type="number" id="editGenerasi" class="form-control" min="1" max="10" required>
+              </div>
+
+              <!-- BARIS SILSILAH EDIT: NAMA AYAH & URUTAN ANAK -->
+              <div class="col-md-7">
+                <label class="form-label small fw-semibold">Anak Dari (Nama Ayah)</label>
+                <input type="text" id="editAyah" class="form-control" list="listAyah" placeholder="Ketik nama ayah kandung..." oninput="handleAyahInput('edit')">
+              </div>
+              <div class="col-md-5" id="editColAnakKe" style="display: none;">
+                <label class="form-label small fw-semibold">Anak Ke- (Urutan Lahir)</label>
+                <select id="editAnakKe" class="form-select">
+                  <option value="">-- Pilih Urutan Anak --</option>
+                </select>
+              </div>
+
+              <!-- BARIS PASANGAN DINAMIS & TANGGAL LAHIR -->
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold" id="lblEditPasangan">Istri Dari (Opsional)</label>
+                <input type="text" id="editPasangan" class="form-control" list="listPasangan">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Tanggal Lahir</label>
+                <input type="date" id="editTglLahir" class="form-control" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Alamat Ringkas (Kota/Daerah)</label>
+                <input type="text" id="editAlamatRingkas" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Profesi / Pekerjaan Utama</label>
+                <input type="text" id="editPekerjaan" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Alamat Lengkap</label>
+                <textarea id="editAlamatLengkap" class="form-control" rows="2" required></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Keistimewaan Khusus</label>
+                <input type="text" id="editKeistimewaan" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Bisnis / Usaha Mandiri</label>
+                <input type="text" id="editBisnis" class="form-control">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Riwayat Ringkas (Tampil di kartu depan)</label>
+                <input type="text" id="editRiwayatRingkas" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Riwayat Lengkap (Muncul saat diklik)</label>
+                <textarea id="editRiwayatLengkap" class="form-control" rows="3" required></textarea>
+              </div>
+
+              <!-- GANTI FOTO VIA FILE KOMPUTER ATAU BIARKAN LAMA -->
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Ganti Foto Profil (Upload File)</label>
+                <input type="file" id="editFotoFile" class="form-control" accept="image/*" onchange="previewUploadImage(this, 'editFotoPreview')">
+              </div>
+              <div class="col-md-6 d-flex align-items-center gap-2 mt-4">
+                <img id="editFotoPreview" src="" class="rounded-circle border border-2 border-success" style="width: 50px; height: 50px; object-fit: cover;">
+                <input type="hidden" id="editFotoUrl">
+                <small class="text-muted">Pilih file baru jika ingin mengganti foto saat ini.</small>
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Nomor WhatsApp / Telepon</label>
+                <input type="text" id="editTelepon" class="form-control">
+              </div>
+            </div>
+            <div class="mt-4 text-end">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-success px-4 fw-bold">Simpan Perubahan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETAIL ALAMAT LENGKAP -->
+  <div class="modal fade" id="modalAlamat" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Detail Alamat Lengkap</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body py-3">
+          <h6 class="fw-bold text-success mb-1" id="modalAlamatNama">-</h6>
+          <p class="text-secondary mb-3" id="modalAlamatIsi" style="line-height: 1.6;">-</p>
+          <div class="p-3 bg-light rounded-3 small border">
+            <i class="bi bi-info-circle text-primary me-1"></i> Digunakan untuk kunjungan silaturahmi, pengiriman undangan fisik, atau paket persaudaraan.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETAIL RIWAYAT HIDUP LENGKAP -->
+  <div class="modal fade" id="modalRiwayat" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-journal-richtext text-success me-2"></i>Riwayat & Perjalanan Hidup</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body py-3">
+          <h5 class="fw-bold text-dark mb-1" id="modalRiwayatNama">-</h5>
+          <div class="text-muted small mb-3" id="modalRiwayatProfesi">-</div>
+          <div class="p-3 bg-light rounded-3 mb-3 border">
+            <h6 class="fw-bold text-success mb-1"><i class="bi bi-star-fill text-warning me-1"></i> Keistimewaan Khusus:</h6>
+            <p class="mb-0 text-secondary" id="modalRiwayatKeistimewaan">-</p>
+          </div>
+          <div class="p-3 bg-light rounded-3 mb-3 border">
+            <h6 class="fw-bold text-success mb-1"><i class="bi bi-briefcase-fill text-primary me-1"></i> Rekam Jejak Bisnis & Usaha:</h6>
+            <p class="mb-0 text-secondary" id="modalRiwayatBisnis">-</p>
+          </div>
+          <h6 class="fw-bold text-dark mb-2">Kisah Hidup & Pengabdian:</h6>
+          <p class="text-secondary" id="modalRiwayatIsi" style="line-height: 1.7; white-space: pre-line;">-</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BUAT ACARA BARU -->
+  <div class="modal fade" id="modalAddKegiatan" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header bg-custom-header text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus me-2"></i>Buat Jadwal Acara Trah</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formAddKegiatan" onsubmit="event.preventDefault(); submitKegiatan();">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Nama Acara</label>
+              <input type="text" id="inAcaraNama" class="form-control" required placeholder="Contoh: Arisan Putaran 7 & Pengajian">
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Tipe Acara</label>
+                <select id="inAcaraTipe" class="form-select">
+                  <option value="Arisan">Arisan</option>
+                  <option value="Pengajian">Pengajian</option>
+                  <option value="Silaturahmi">Silaturahmi</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Iuran / Uang Kas (Rp)</label>
+                <input type="number" id="inAcaraBiaya" class="form-control" value="0">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Tanggal & Waktu</label>
+              <input type="text" id="inAcaraWaktu" class="form-control" required placeholder="Contoh: 2026-07-12 10:00 WIB">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Lokasi Acara</label>
+              <input type="text" id="inAcaraLokasi" class="form-control" required placeholder="Alamat lengkap lokasi acara">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Tuan Rumah</label>
+              <input type="text" id="inAcaraTuanRumah" class="form-control" required placeholder="Nama tuan rumah pelaksana">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Keterangan / Agenda</label>
+              <textarea id="inAcaraDeskripsi" class="form-control" rows="2" placeholder="Penjelasan agenda kegiatan..."></textarea>
+            </div>
+            <div class="text-end">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-success fw-bold px-4">Simpan Jadwal</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH GALERI (FILE KOMPUTER ATAU URL) -->
+  <div class="modal fade" id="modalAddGaleri" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header bg-custom-header text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-image me-2"></i>Tambah Dokumentasi Foto</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formAddGaleri" onsubmit="event.preventDefault(); submitGaleri();">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Judul Momen Foto</label>
+              <input type="text" id="inGaleriJudul" class="form-control" required placeholder="Contoh: Liburan Keluarga ke Yogyakarta">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Kategori Dokumentasi</label>
+              <select id="inGaleriKategori" class="form-select">
+                <option value="Momen Lebaran">Momen Lebaran</option>
+                <option value="Arisan">Arisan & Reuni</option>
+                <option value="Pendidikan">Pendidikan & Prestasi</option>
+                <option value="Wisata">Wisata Keluarga</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Pilih File Foto dari Komputer / HP</label>
+              <input type="file" id="inGaleriFile" class="form-control" accept="image/*">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted">Atau Gunakan Tautan URL Web</label>
+              <input type="url" id="inGaleriUrl" class="form-control form-control-sm" placeholder="https://images.unsplash.com/...">
+            </div>
+            <div class="text-end">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-success fw-bold px-4">Unggah Foto</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // DUMMY SIMULATION DATABASE (GEMINI CANVAS / LOCAL BROWSER)
+    let db = {
+      users: [
+        { id: "USR-001", username: "admin", password: "keluarga123", nama: "Bapak Yudho Purwoko", role: "Admin" },
+        { id: "USR-002", username: "keluarga", password: "123456", nama: "Anggota Keluarga", role: "Anggota" }
+      ],
+      anggota: [
+        {
+          id: "MBR-001",
+          nama: "Bapak Tohari",
+          gender: "L",
+          generasi: "1",
+          ayah: "-",
+          anak_ke: "1",
+          pasangan: "Ibu Siti Aminah",
+          id_ortu: "",
+          tgl_lahir: "1940-05-12",
+          alamat_ringkas: "Solo, Jawa Tengah",
+          alamat_lengkap: "Jl. Slamet Riyadi No. 45, Laweyan, Surakarta, Jawa Tengah",
+          pekerjaan: "Pendidik & Tokoh Adat",
+          keistimewaan: "Hafal silsilah 7 turunan & pengayom trah keluarga",
+          bisnis: "Perkebunan & Toko Buku Pusaka",
+          riwayat_ringkas: "Sesepuh keluarga yang mendidik dengan kesederhanaan.",
+          riwayat_lengkap: "Lahir di era perintis kemerdekaan. Mendedikasikan hidupnya untuk pendidikan rakyat dan memelihara kerukunan antar generasi trah keluarga besar.",
+          telepon: "081234567801",
+          foto_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200"
+        },
+        {
+          id: "MBR-002",
+          nama: "Ibu Siti Aminah",
+          gender: "P",
+          generasi: "1",
+          ayah: "-",
+          anak_ke: "1",
+          pasangan: "Bapak Tohari",
+          id_ortu: "",
+          tgl_lahir: "1945-08-20",
+          alamat_ringkas: "Solo, Jawa Tengah",
+          alamat_lengkap: "Jl. Slamet Riyadi No. 45, Laweyan, Surakarta, Jawa Tengah",
+          pekerjaan: "Wiraswasta",
+          keistimewaan: "Memasak kuliner khas legendaris & pemersatu cucu",
+          bisnis: "Batik Tulis Pusaka",
+          riwayat_ringkas: "Penyayang, selalu menjadi pusat keceriaan di setiap reuni trah.",
+          riwayat_lengkap: "Mendampingi keluarga selama puluhan tahun, mengayomi anak cucu dan aktif melestarikan tradisi luhur keluarga.",
+          telepon: "081234567802",
+          foto_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200"
+        },
+        {
+          id: "MBR-003",
+          nama: "Yudho Purwoko",
+          gender: "L",
+          generasi: "2",
+          ayah: "Bapak Tohari",
+          anak_ke: "5",
+          pasangan: "Istri Tercinta",
+          id_ortu: "MBR-001",
+          tgl_lahir: "1971-03-09",
+          alamat_ringkas: "Depok, Jawa Barat",
+          alamat_lengkap: "Komplek Pesona Kahuripan Blok C, Depok, Jawa Barat",
+          pekerjaan: "Head of Finance & Konsultan Bisnis",
+          keistimewaan: "Visioner, teliti tata kelola dan perencana masa depan",
+          bisnis: "Konsultan Manajemen Bisnis & Infrastruktur",
+          riwayat_ringkas: "Anak ke-5 yang aktif merajut silaturahmi seluruh trah.",
+          riwayat_lengkap: "Lulusan Psikologi yang berpengalaman panjang di manajemen korporasi, telekomunikasi, dan tata kelola organisasi. Selalu menjadi inisiator digitalisasi keluarga.",
+          telepon: "081198765432",
+          foto_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200"
+        },
+        {
+          id: "MBR-004",
+          nama: "Tikmung Kicik",
+          gender: "P",
+          generasi: "3",
+          ayah: "Yudho Purwoko",
+          anak_ke: "1",
+          pasangan: "-",
+          id_ortu: "MBR-003",
+          tgl_lahir: "2008-07-14",
+          alamat_ringkas: "Depok, Jawa Barat",
+          alamat_lengkap: "Komplek Pesona Kahuripan Blok C, Depok, Jawa Barat",
+          pekerjaan: "Pelajar / Mahasiswa",
+          keistimewaan: "Kreatif, melek teknologi dan jago desain visual digital",
+          bisnis: "Studio Desain Kreatif",
+          riwayat_ringkas: "Generasi muda pembawa keceriaan dan inovasi keluarga.",
+          riwayat_lengkap: "Generasi cucu yang aktif membantu urusan teknologi informasi, pembuatan konten dokumentasi, dan visual grafis setiap agenda trah.",
+          telepon: "081299887766",
+          foto_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200"
+        }
+      ],
+      statusFeed: [
+        { id: "F-001", nama_penulis: "Yudho Purwoko", konten: "Alhamdulillah arisan putaran lalu lancar berkah. Semoga trah kita selalu guyub rukun!", kategori: "Kabar", suka_count: 15, tanggal: "2026-05-15 14:00" },
+        { id: "F-002", nama_penulis: "Tikmung Kicik", konten: "Humor sore: Kenapa kakek kalau jalan santai suka bawa tongkat? Soalnya kalau bawa remote TV diperebutkan cucu! Haha", kategori: "Humor", suka_count: 24, tanggal: "2026-05-16 17:30" }
+      ],
+      komentarStatus: [
+        { id: "KMT-001", id_feed: "F-001", nama_komentator: "Bapak Tohari", komentar: "Aamiin ya Rabbal alamin, berkah kagem sedoyo.", tanggal: "2026-05-15 15:10" },
+        { id: "KMT-002", id_feed: "F-002", nama_komentator: "Yudho Purwoko", komentar: "Bisa aja Tikmung haha!", tanggal: "2026-05-16 18:05" }
+      ],
+      kegiatan: [
+        { id: "EVT-01", nama_acara: "Arisan Bulanan & Halal Bihalal", tipe: "Arisan", tanggal_waktu: "2026-06-07 10:00", lokasi: "Kediaman Mas Yudho (Depok)", tuan_rumah: "Keluarga Mas Yudho", deskripsi: "Kocokan arisan putaran ke-6 sekaligus syukuran silaturahmi.", biaya: "100000" },
+        { id: "EVT-02", nama_acara: "Khataman & Pengajian Rutin Trah", tipe: "Pengajian", tanggal_waktu: "2026-06-21 19:30", lokasi: "Grup Online Zoom & Kediaman Solo", tuan_rumah: "Bapak Tohari", deskripsi: "Doa bersama keselamatan sesepuh serta kesuksesan anak cucu.", biaya: "0" }
+      ],
+      pendaftaran: [],
+      grupChat: [
+        { id: "C-01", nama_pengirim: "Bapak Tohari", pesan: "Assalamu'alaikum anak cucu sekalian, semoga sehat semua.", waktu: "08:15" },
+        { id: "C-02", nama_pengirim: "Yudho Purwoko", pesan: "Wa'alaikumussalam Bapak, aamiin ya rabbal alamin.", waktu: "08:20" }
+      ],
+      galeri: [
+        { id: "GAL-01", judul: "Silaturahmi Idul Fitri Trah Solo", kategori: "Momen Lebaran", foto_url: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600", pengunggah: "Yudho Purwoko", tanggal: "2026-04-10" },
+        { id: "GAL-02", judul: "Wisuda & Syukuran Generasi Muda", kategori: "Pendidikan", foto_url: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600", pengunggah: "Tikmung Kicik", tanggal: "2026-05-02" }
+      ],
+      komunitas: [
+        { id: "KOM-01", nama_komunitas: "Komunitas Sepeda & Gowes Sehat Trah", deskripsi: "Kegiatan bersepeda santai mingguan keluarga besar", ketua: "Yudho Purwoko", jumlah_anggota: 12 },
+        { id: "KOM-02", nama_komunitas: "Forum Wirausaha & Bisnis Keluarga", deskripsi: "Kolaborasi usaha, pemasaran produk, dan investasi antar saudara", ketua: "Bapak Tohari", jumlah_anggota: 8 }
+      ]
+    };
+
+    let currentUser = null;
+
+    const memoryStorage = {};
+    function setItemSafe(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { memoryStorage[k] = v; } }
+    function getItemSafe(k) { try { return sessionStorage.getItem(k) || memoryStorage[k] || null; } catch (e) { return memoryStorage[k] || null; } }
+    function removeItemSafe(k) { try { sessionStorage.removeItem(k); } catch (e) { delete memoryStorage[k]; } }
+
+    function startLoading(msg) {
+      document.getElementById('loadingText').innerText = msg || 'Memuat Data...';
+      document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+
+    function endLoading() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    // HELPER: PREVIEW FOTO LOKAL SEBELUM DI-UPLOAD
+    function previewUploadImage(inputEl, previewImgId) {
+      if (inputEl.files && inputEl.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById(previewImgId).src = e.target.result;
+        };
+        reader.readAsDataURL(inputEl.files[0]);
+      }
+    }
+
+    // HELPER: PROMISE UPLOAD FILE DARI KOMPUTER/HP KE DRIVE / SIMULASI
+    function uploadImageAsync(fileInput) {
+      return new Promise((resolve, reject) => {
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+          resolve(null);
+          return;
+        }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64Data = e.target.result;
+          if (typeof google === 'undefined' || !google.script || !google.script.run) {
+            resolve(base64Data);
+          } else {
+            google.script.run
+              .withSuccessHandler(res => {
+                if (res && res.status === 'success') {
+                  resolve(res.fileUrl);
+                } else {
+                  reject(res ? res.message : "Gagal upload gambar");
+                }
+              })
+              .withFailureHandler(err => reject(err.toString()))
+              .uploadFileToDrive(base64Data, file.name, file.type);
+          }
+        };
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // LOGIN AUTH
+    function executeLogin() {
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+
+      if (!u || !p) {
+        Swal.fire('Perhatian', 'Harap isi username dan password!', 'warning');
+        return;
+      }
+
+      startLoading('Memverifikasi akun trah...');
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        setTimeout(() => {
+          const match = db.users.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
+          endLoading();
+          if (match) {
+            onLoginSuccess({ id: match.id, username: match.username, nama: match.nama, role: match.role });
+          } else {
+            Swal.fire('Gagal Masuk', 'Username atau password salah (Simulasi)!', 'error');
+          }
+        }, 350);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(res => {
+          endLoading();
+          if (res && res.status === 'success') {
+            onLoginSuccess(res.user);
+          } else {
+            Swal.fire('Gagal Masuk', res ? res.message : 'Kombinasi akun salah!', 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          endLoading();
+          Swal.fire('Koneksi Gagal', err.toString(), 'error');
+        })
+        .loginUser(u, p);
+    }
+
+    function onLoginSuccess(user) {
+      currentUser = user;
+      setItemSafe('trah_user', JSON.stringify(user));
+      document.getElementById('authContainer').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('userBadgeName').innerText = user.nama;
+      document.getElementById('userBadgeRole').innerText = '(' + user.role + ')';
+      initDropdownAnakKe();
+      loadData();
+    }
+
+    function logoutUser() {
+      currentUser = null;
+      removeItemSafe('trah_user');
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('authContainer').style.display = 'flex';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function loadData() {
+      startLoading('Sinkronisasi data portal keluarga...');
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        setTimeout(() => {
+          populateDatalists();
+          renderUI();
+          endLoading();
+        }, 300);
+      } else {
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.status === 'success') {
+              if (res.anggota) db.anggota = res.anggota;
+              if (res.statusFeed) db.statusFeed = res.statusFeed;
+              if (res.komentarStatus) db.komentarStatus = res.komentarStatus;
+              if (res.kegiatan) db.kegiatan = res.kegiatan;
+              if (res.pendaftaran) db.pendaftaran = res.pendaftaran;
+              if (res.grupChat) db.grupChat = res.grupChat;
+              if (res.galeri) db.galeri = res.galeri;
+              if (res.komunitas) db.komunitas = res.komunitas;
+            }
+            populateDatalists();
+            renderUI();
+            endLoading();
+          })
+          .withFailureHandler(err => {
+            console.error(err);
+            populateDatalists();
+            renderUI();
+            endLoading();
+          })
+          .getAllData();
+      }
+    }
+
+    function renderUI() {
+      renderSilsilah();
+      renderTree();
+      renderFeed();
+      renderKegiatan();
+      renderGaleri();
+      renderKomunitas();
+      renderChat();
+    }
+
+    // INISIALISASI DROPDOWN URUTAN ANAK 1-30
+    function initDropdownAnakKe() {
+      const selects = ['inAnakKe', 'editAnakKe'];
+      selects.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          let opts = '<option value="">-- Pilih Urutan Anak (1 - 30) --</option>';
+          for (let i = 1; i <= 30; i++) {
+            opts += `<option value="${i}">Anak Ke-${i}</option>`;
+          }
+          el.innerHTML = opts;
+        }
+      });
+    }
+
+    // LOGIKA PERUBAHAN GENDER & LABEL PASANGAN
+    function handleGenderChange(prefix) {
+      const gender = document.getElementById(prefix + 'Gender').value;
+      const lbl = document.getElementById(prefix === 'in' ? 'lblInPasangan' : 'lblEditPasangan');
+      
+      // Jika Laki-laki -> mencari ISTRI. Jika Perempuan -> mencari SUAMI.
+      if (gender === 'L') {
+        lbl.innerText = 'Istri Dari (Opsional)';
+      } else {
+        lbl.innerText = 'Suami Dari (Opsional)';
+      }
+      populateDatalists(prefix, gender);
+    }
+
+    // AUTOCOMPLETE DATALIST DENGAN DUKUNGAN KETIK 1-2 HURUF
+    function populateDatalists(prefix, genderVal) {
+      const dListAyah = document.getElementById('listAyah');
+      if (dListAyah && db.anggota) {
+        const fathers = db.anggota.filter(m => m.gender === 'L');
+        dListAyah.innerHTML = fathers.map(f => `<option value="${f.nama}">`).join('');
+      }
+
+      const dListPasangan = document.getElementById('listPasangan');
+      if (dListPasangan && db.anggota) {
+        const curPrefix = prefix || 'in';
+        const curGender = genderVal || (document.getElementById(curPrefix + 'Gender') ? document.getElementById(curPrefix + 'Gender').value : 'L');
+        const targetGender = (curGender === 'L') ? 'P' : 'L';
+        const potentialSpouses = db.anggota.filter(m => m.gender === targetGender);
+        dListPasangan.innerHTML = potentialSpouses.map(s => `<option value="${s.nama}">${s.nama} (Generasi ${s.generasi})</option>`).join('');
+      }
+    }
+
+    // TAMPILKAN DROPDOWN ANAK KE- SAAT NAMA AYAH TERISI
+    function handleAyahInput(prefix) {
+      const val = document.getElementById(prefix + 'Ayah').value.trim();
+      const colAnakKe = document.getElementById(prefix === 'in' ? 'inColAnakKe' : 'editColAnakKe');
+      if (val !== '') {
+        colAnakKe.style.display = 'block';
+      } else {
+        colAnakKe.style.display = 'none';
+        document.getElementById(prefix + 'AnakKe').value = '';
+      }
+    }
+
+    // 1. RENDER DIREKTORI ANGGOTA SILSILAH
+    function renderSilsilah() {
+      const q = (document.getElementById('searchAnggota').value || '').toLowerCase();
+      const gen = document.getElementById('filterGenerasi').value;
+      const container = document.getElementById('silsilahGrid');
+
+      const filtered = db.anggota.filter(m => {
+        const matchQ = m.nama.toLowerCase().includes(q) ||
+          (m.pekerjaan && m.pekerjaan.toLowerCase().includes(q)) ||
+          (m.bisnis && m.bisnis.toLowerCase().includes(q)) ||
+          (m.alamat_ringkas && m.alamat_ringkas.toLowerCase().includes(q));
+        const matchGen = gen ? String(m.generasi) === gen : true;
+        return matchQ && matchGen;
+      });
+
+      if (!filtered.length) {
+        container.innerHTML = '<div class="col-12 text-center text-muted py-5">Tidak ditemukan anggota keluarga dengan filter ini.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(m => `
+        <div class="col-md-6 col-lg-4">
+          <div class="family-card p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="avatar-container">
+                  <img src="${m.foto_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200'}" class="avatar-wrap">
+                  <button type="button" class="btn btn-sm btn-success btn-change-photo" title="Ganti Foto Profil" onclick="openModalGantiFoto('${m.id}')">
+                    <i class="bi bi-camera"></i>
+                  </button>
+                </div>
+                <div>
+                  <h6 class="fw-bold text-dark mb-0">${m.nama}</h6>
+                  <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small">Generasi ${m.generasi}</span>
+                  <div class="text-muted small">
+                    ${m.gender === 'L' ? 'Laki-laki' : 'Perempuan'} &bull; 
+                    ${m.gender === 'L' ? 'Istri:' : 'Suami:'} <strong>${m.pasangan || '-'}</strong>
+                  </div>
+                  ${m.ayah && m.ayah !== '-' ? `
+                  <div class="text-muted small" style="font-size: 0.78rem;">
+                    <i class="bi bi-person-heart text-success"></i> Anak dari: <strong>${m.ayah}</strong> ${m.anak_ke && m.anak_ke !== '-' ? `(Anak ke-${m.anak_ke})` : ''}
+                  </div>` : ''}
+                </div>
+              </div>
+
+              <div class="small text-secondary mb-2">
+                <i class="bi bi-calendar3 me-1 text-success"></i> Lahir: <strong>${m.tgl_lahir || '-'}</strong>
+              </div>
+              <div class="small text-secondary mb-2">
+                <i class="bi bi-geo-alt me-1 text-danger"></i> Alamat: 
+                <span class="badge bg-light text-dark border clickable-badge" onclick="showModalAlamat('${encodeURIComponent(m.nama)}', '${encodeURIComponent(m.alamat_lengkap)}')">
+                  ${m.alamat_ringkas} <i class="bi bi-box-arrow-up-right ms-1"></i>
+                </span>
+              </div>
+              <div class="small text-secondary mb-2">
+                <i class="bi bi-briefcase me-1 text-primary"></i> Profesi: <strong>${m.pekerjaan || '-'}</strong>
+              </div>
+              ${m.bisnis && m.bisnis !== '-' ? `
+              <div class="small text-secondary mb-2">
+                <i class="bi bi-shop me-1 text-warning"></i> Bisnis: <strong>${m.bisnis}</strong>
+              </div>` : ''}
+              <div class="small text-secondary mb-3">
+                <i class="bi bi-star me-1 text-warning"></i> Keistimewaan: <span class="fst-italic text-dark">${m.keistimewaan || '-'}</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+              <span class="small text-muted text-truncate me-2" style="max-width: 50%;">${m.riwayat_ringkas}</span>
+              <div class="d-flex gap-1">
+                <button class="btn btn-outline-primary btn-sm rounded-pill px-2 py-1 small" title="Edit Anggota" onclick="openModalEditAnggota('${m.id}')">
+                  <i class="bi bi-pencil me-1"></i>Edit
+                </button>
+                <button class="btn btn-outline-success btn-sm rounded-pill px-2 py-1 small" onclick="showModalRiwayat('${m.id}')">
+                  <i class="bi bi-book me-1"></i>Riwayat
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 2. RENDER TREE VIEW
+    function renderTree() {
+      const container = document.getElementById('treeContainer');
+      const g1 = db.anggota.filter(x => String(x.generasi) === '1');
+      const g2 = db.anggota.filter(x => String(x.generasi) === '2');
+      const g3 = db.anggota.filter(x => String(x.generasi) === '3');
+      const g4 = db.anggota.filter(x => String(x.generasi) === '4');
+
+      function buildNode(p, badgeClass, badgeLabel) {
+        return `
+          <div class="tree-node">
+            <span class="badge ${badgeClass} mb-2">${badgeLabel}</span>
+            <div class="tree-avatar-container">
+              <img src="${p.foto_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200'}" class="tree-avatar">
+              <button type="button" class="btn btn-sm btn-success btn-change-photo" title="Ganti Foto" onclick="openModalGantiFoto('${p.id}')">
+                <i class="bi bi-camera"></i>
+              </button>
+            </div>
+            <div class="fw-bold text-dark fs-6">${p.nama}</div>
+            <small class="text-muted d-block">${p.pasangan && p.pasangan !== '-' ? (p.gender === 'L' ? 'Istri: ' : 'Suami: ') + p.pasangan : p.pekerjaan}</small>
+            ${p.ayah && p.ayah !== '-' ? `<small class="text-secondary d-block" style="font-size: 0.72rem;">Anak dari ${p.ayah}</small>` : ''}
+            <div class="mt-2 d-flex justify-content-center gap-2">
+              <button class="btn btn-xs btn-outline-secondary py-0 px-2 rounded-pill small" onclick="openModalEditAnggota('${p.id}')">
+                <i class="bi bi-pencil"></i> Edit
+              </button>
+              <button class="btn btn-xs btn-outline-success py-0 px-2 rounded-pill small" onclick="showModalRiwayat('${p.id}')">
+                <i class="bi bi-info-circle"></i> Info
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      let html = '<div class="d-flex flex-wrap justify-content-center gap-3">';
+      g1.forEach(p => { html += buildNode(p, 'bg-success', 'Generasi 1 (Sesepuh)'); });
+      html += '</div>';
+
+      if (g2.length) {
+        html += '<div class="tree-line"></div><div class="d-flex flex-wrap justify-content-center gap-3">';
+        g2.forEach(c => { html += buildNode(c, 'bg-primary', 'Generasi 2 (Anak)'); });
+        html += '</div>';
+      }
+
+      if (g3.length) {
+        html += '<div class="tree-line"></div><div class="d-flex flex-wrap justify-content-center gap-3">';
+        g3.forEach(g => { html += buildNode(g, 'bg-warning text-dark', 'Generasi 3 (Cucu)'); });
+        html += '</div>';
+      }
+
+      if (g4.length) {
+        html += '<div class="tree-line"></div><div class="d-flex flex-wrap justify-content-center gap-3">';
+        g4.forEach(d => { html += buildNode(d, 'bg-info text-dark', 'Generasi 4 (Cicit)'); });
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    // 3. RENDER FEED BESERTA KOMENTAR
+    function renderFeed() {
+      const container = document.getElementById('feedList');
+      if (!db.komentarStatus) db.komentarStatus = [];
+
+      container.innerHTML = db.statusFeed.map(f => {
+        const comments = db.komentarStatus.filter(c => c.id_feed === f.id);
+        const commentsHtml = comments.map(c => `
+          <div class="comment-item">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <strong class="text-success small">${c.nama_komentator}</strong>
+              <span class="text-muted" style="font-size: 0.7rem;">${c.tanggal}</span>
+            </div>
+            <div class="text-dark small">${c.komentar}</div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="card border-0 shadow-sm rounded-4 p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-person-circle fs-3 text-secondary"></i>
+                <div>
+                  <strong class="text-dark">${f.nama_penulis}</strong>
+                  <div class="text-muted" style="font-size: 0.75rem;">${f.tanggal}</div>
+                </div>
+              </div>
+              <span class="badge ${f.kategori === 'Humor' ? 'bg-warning text-dark' : 'bg-success-subtle text-success'} rounded-pill px-3">
+                ${f.kategori}
+              </span>
+            </div>
+            <p class="text-secondary mb-3" style="line-height: 1.6;">${f.konten}</p>
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top mb-3">
+              <button class="btn btn-sm btn-light rounded-pill px-3" onclick="likeFeed('${f.id}', this)">
+                <i class="bi bi-heart-fill text-danger me-1"></i> <span>${f.suka_count || 0}</span> Suka
+              </button>
+              <span class="small text-muted"><i class="bi bi-chat-left-text me-1"></i>${comments.length} Komentar</span>
+            </div>
+
+            <div class="mb-2" id="comments-${f.id}">
+              ${commentsHtml}
+            </div>
+
+            <div class="input-group input-group-sm">
+              <input type="text" id="comment-input-${f.id}" class="form-control rounded-start-pill" placeholder="Tulis komentar Anda..." onkeydown="if(event.key==='Enter') submitKomentar('${f.id}')">
+              <button class="btn btn-outline-success rounded-end-pill px-3" type="button" onclick="submitKomentar('${f.id}')">
+                <i class="bi bi-send-fill"></i> Kirim
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function likeFeed(feedId, btn) {
+      const countSpan = btn.querySelector('span');
+      countSpan.innerText = parseInt(countSpan.innerText) + 1;
+      const feed = db.statusFeed.find(x => x.id === feedId);
+      if (feed) feed.suka_count = parseInt(countSpan.innerText);
+    }
+
+    function submitKomentar(feedId) {
+      const input = document.getElementById('comment-input-' + feedId);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const commenter = currentUser ? currentUser.nama : "Anggota Keluarga";
+      const now = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+      const data = {
+        id_feed: feedId,
+        nama_komentator: commenter,
+        komentar: text
+      };
+
+      input.value = '';
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        data.id = "KMT-" + (db.komentarStatus.length + 1);
+        data.tanggal = now;
+        db.komentarStatus.push(data);
+        renderFeed();
+      } else {
+        data.id = "KMT-TMP";
+        data.tanggal = now;
+        db.komentarStatus.push(data);
+        renderFeed();
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.status === 'success') loadData();
+          })
+          .saveKomentar(data);
+      }
+    }
+
+    function openModalGantiFoto(id) {
+      const m = db.anggota.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('gantiFotoId').value = m.id;
+      document.getElementById('gantiFotoNama').innerText = m.nama;
+      document.getElementById('gantiFotoPreview').src = m.foto_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200';
+      document.getElementById('gantiFotoUrlInput').value = m.foto_url || '';
+      document.getElementById('fileGantiFoto').value = '';
+      new bootstrap.Modal(document.getElementById('modalGantiFoto')).show();
+    }
+
+    async function submitGantiFoto() {
+      const id = document.getElementById('gantiFotoId').value;
+      const fileInput = document.getElementById('fileGantiFoto');
+      let newUrl = document.getElementById('gantiFotoUrlInput').value.trim();
+
+      startLoading('Mengunggah & memperbarui foto profil...');
+
+      try {
+        const uploadedUrl = await uploadImageAsync(fileInput);
+        if (uploadedUrl) newUrl = uploadedUrl;
+      } catch (err) {
+        endLoading();
+        return Swal.fire('Gagal Upload', err, 'error');
+      }
+
+      if (!newUrl) {
+        endLoading();
+        return Swal.fire('Perhatian', 'Pilih berkas foto dari komputer atau masukkan tautan URL!', 'warning');
+      }
+
+      bootstrap.Modal.getInstance(document.getElementById('modalGantiFoto')).hide();
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        const m = db.anggota.find(x => x.id === id);
+        if (m) m.foto_url = newUrl;
+        renderSilsilah();
+        renderTree();
+        endLoading();
+        Swal.fire('Berhasil', 'Foto profil berhasil diperbarui (Simulasi)!', 'success');
+      } else {
+        google.script.run
+          .withSuccessHandler(res => {
+            loadData();
+            Swal.fire('Berhasil', 'Foto profil baru berhasil disimpan!', 'success');
+          })
+          .withFailureHandler(err => {
+            endLoading();
+            Swal.fire('Gagal', err.toString(), 'error');
+          })
+          .updateFotoProfil(id, newUrl);
+      }
+    }
+
+    function openModalEditAnggota(id) {
+      const m = db.anggota.find(x => x.id === id);
+      if (!m) return;
+
+      document.getElementById('editId').value = m.id;
+      document.getElementById('editNama').value = m.nama || '';
+      document.getElementById('editGender').value = m.gender || 'L';
+      document.getElementById('editGenerasi').value = m.generasi || '1';
+
+      document.getElementById('editAyah').value = m.ayah || '';
+      handleAyahInput('edit');
+      document.getElementById('editAnakKe').value = m.anak_ke || '';
+
+      handleGenderChange('edit');
+      document.getElementById('editPasangan').value = m.pasangan || '';
+
+      document.getElementById('editTglLahir').value = m.tgl_lahir || '';
+      document.getElementById('editAlamatRingkas').value = m.alamat_ringkas || '';
+      document.getElementById('editAlamatLengkap').value = m.alamat_lengkap || '';
+      document.getElementById('editPekerjaan').value = m.pekerjaan || '';
+      document.getElementById('editKeistimewaan').value = m.keistimewaan || '';
+      document.getElementById('editBisnis').value = m.bisnis || '';
+      document.getElementById('editRiwayatRingkas').value = m.riwayat_ringkas || '';
+      document.getElementById('editRiwayatLengkap').value = m.riwayat_lengkap || '';
+      document.getElementById('editFotoUrl').value = m.foto_url || '';
+      document.getElementById('editFotoPreview').src = m.foto_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200';
+      document.getElementById('editFotoFile').value = '';
+      document.getElementById('editTelepon').value = m.telepon || '';
+
+      new bootstrap.Modal(document.getElementById('modalEditAnggota')).show();
+    }
+
+    async function submitUpdateAnggota() {
+      const fileInput = document.getElementById('editFotoFile');
+      startLoading('Menyimpan perubahan profil dan foto...');
+
+      let photoUrl = document.getElementById('editFotoUrl').value;
+      try {
+        const uploadedUrl = await uploadImageAsync(fileInput);
+        if (uploadedUrl) photoUrl = uploadedUrl;
+      } catch (err) {
+        endLoading();
+        return Swal.fire('Gagal Upload', err, 'error');
+      }
+
+      const form = {
+        id: document.getElementById('editId').value,
+        nama: document.getElementById('editNama').value.trim(),
+        gender: document.getElementById('editGender').value,
+        generasi: document.getElementById('editGenerasi').value,
+        ayah: document.getElementById('editAyah').value.trim() || "-",
+        anak_ke: document.getElementById('editAnakKe').value || "-",
+        pasangan: document.getElementById('editPasangan').value.trim() || "-",
+        tgl_lahir: document.getElementById('editTglLahir').value,
+        alamat_ringkas: document.getElementById('editAlamatRingkas').value.trim(),
+        alamat_lengkap: document.getElementById('editAlamatLengkap').value.trim(),
+        pekerjaan: document.getElementById('editPekerjaan').value.trim(),
+        keistimewaan: document.getElementById('editKeistimewaan').value.trim(),
+        bisnis: document.getElementById('editBisnis').value.trim(),
+        riwayat_ringkas: document.getElementById('editRiwayatRingkas').value.trim(),
+        riwayat_lengkap: document.getElementById('editRiwayatLengkap').value.trim(),
+        foto_url: photoUrl,
+        telepon: document.getElementById('editTelepon').value.trim()
+      };
+
+      bootstrap.Modal.getInstance(document.getElementById('modalEditAnggota')).hide();
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        const idx = db.anggota.findIndex(x => x.id === form.id);
+        if (idx !== -1) db.anggota[idx] = { ...db.anggota[idx], ...form };
+        populateDatalists();
+        renderSilsilah();
+        renderTree();
+        endLoading();
+        Swal.fire('Berhasil', 'Perubahan anggota dan foto tersimpan (Simulasi)!', 'success');
+      } else {
+        google.script.run
+          .withSuccessHandler(res => {
+            loadData();
+            Swal.fire('Berhasil', 'Perubahan anggota berhasil disimpan ke Spreadsheet!', 'success');
+          })
+          .withFailureHandler(err => {
+            endLoading();
+            Swal.fire('Gagal', err.toString(), 'error');
+          })
+          .updateAnggota(form);
+      }
+    }
+
+    async function submitAnggota() {
+      const fileInput = document.getElementById('inFotoFile');
+      startLoading('Mengunggah foto & menyimpan anggota baru...');
+
+      let photoUrl = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200';
+      try {
+        const uploadedUrl = await uploadImageAsync(fileInput);
+        if (uploadedUrl) photoUrl = uploadedUrl;
+      } catch (err) {
+        endLoading();
+        return Swal.fire('Gagal Upload', err, 'error');
+      }
+
+      const form = {
+        nama: document.getElementById('inNama').value.trim(),
+        gender: document.getElementById('inGender').value,
+        generasi: document.getElementById('inGenerasi').value,
+        ayah: document.getElementById('inAyah').value.trim() || "-",
+        anak_ke: document.getElementById('inAnakKe').value || "-",
+        pasangan: document.getElementById('inPasangan').value.trim() || "-",
+        tgl_lahir: document.getElementById('inTglLahir').value,
+        alamat_ringkas: document.getElementById('inAlamatRingkas').value.trim(),
+        alamat_lengkap: document.getElementById('inAlamatLengkap').value.trim(),
+        pekerjaan: document.getElementById('inPekerjaan').value.trim(),
+        keistimewaan: document.getElementById('inKeistimewaan').value.trim(),
+        bisnis: document.getElementById('inBisnis').value.trim(),
+        riwayat_ringkas: document.getElementById('inRiwayatRingkas').value.trim(),
+        riwayat_lengkap: document.getElementById('inRiwayatLengkap').value.trim(),
+        foto_url: photoUrl
+      };
+
+      bootstrap.Modal.getInstance(document.getElementById('modalAddAnggota')).hide();
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        setTimeout(() => {
+          form.id = "MBR-00" + (db.anggota.length + 1);
+          db.anggota.push(form);
+          populateDatalists();
+          renderSilsilah();
+          renderTree();
+          endLoading();
+          Swal.fire('Berhasil', 'Anggota keluarga baru tersimpan (Simulasi)!', 'success');
+          document.getElementById('formAddAnggota').reset();
+          document.getElementById('inColAnakKe').style.display = 'none';
+        }, 350);
+      } else {
+        google.script.run
+          .withSuccessHandler(res => {
+            loadData();
+            Swal.fire('Berhasil', 'Data anggota keluarga berhasil ditambahkan ke Spreadsheet!', 'success');
+            document.getElementById('formAddAnggota').reset();
+            document.getElementById('inColAnakKe').style.display = 'none';
+          })
+          .withFailureHandler(err => {
+            endLoading();
+            Swal.fire('Gagal', err.toString(), 'error');
+          })
+          .saveAnggota(form);
+      }
+    }
+
+    function showModalAlamat(nama, alamat) {
+      document.getElementById('modalAlamatNama').innerText = decodeURIComponent(nama);
+      document.getElementById('modalAlamatIsi').innerText = decodeURIComponent(alamat);
+      new bootstrap.Modal(document.getElementById('modalAlamat')).show();
+    }
+
+    function showModalRiwayat(id) {
+      const m = db.anggota.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('modalRiwayatNama').innerText = m.nama;
+      document.getElementById('modalRiwayatProfesi').innerText = `${m.pekerjaan} | Generasi Ke-${m.generasi}`;
+      document.getElementById('modalRiwayatKeistimewaan').innerText = m.keistimewaan || '-';
+      document.getElementById('modalRiwayatBisnis').innerText = m.bisnis || '-';
+      document.getElementById('modalRiwayatIsi').innerText = m.riwayat_lengkap || m.riwayat_ringkas;
+      new bootstrap.Modal(document.getElementById('modalRiwayat')).show();
+    }
+
+    function submitFeed() {
+      const konten = document.getElementById('feedContent').value.trim();
+      const kategori = document.getElementById('feedCategory').value;
+      if (!konten) return Swal.fire('Perhatian', 'Ketik isi status terlebih dahulu!', 'warning');
+
+      const data = {
+        nama_penulis: currentUser ? currentUser.nama : "Keluarga",
+        konten: konten,
+        kategori: kategori
+      };
+
+      startLoading('Menerbitkan status...');
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        setTimeout(() => {
+          data.id = "F-" + (db.statusFeed.length + 1);
+          data.suka_count = 0;
+          data.tanggal = "Baru saja";
+          db.statusFeed.unshift(data);
+          renderFeed();
+          endLoading();
+          document.getElementById('feedContent').value = '';
+        }, 300);
+      } else {
+        google.script.run
+          .withSuccessHandler(res => {
+            document.getElementById('feedContent').value = '';
+            loadData();
+          })
+          .withFailureHandler(err => {
+            endLoading();
+            Swal.fire('Error', err.toString(), 'error');
+          })
+          .saveFeed(data);
+      }
+    }
+
+    function renderKegiatan() {
+      const container = document.getElementById('kegiatanList');
+      const select = document.getElementById('rsvpEventSelect');
+
+      select.innerHTML = db.kegiatan.map(k => `<option value="${k.id}">${k.nama_acara} (${k.tanggal_waktu})</option>`).join('');
+
+      container.innerHTML = db.kegiatan.map(k => `
+        <div class="card border-0 shadow-sm rounded-4 p-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span class="badge ${k.tipe === 'Arisan' ? 'bg-primary' : 'bg-success'} rounded-pill px-3 mb-2">${k.tipe}</span>
+              <h5 class="fw-bold text-dark mb-1">${k.nama_acara}</h5>
+              <div class="text-muted small mb-2"><i class="bi bi-clock me-1"></i> Waktu: <strong>${k.tanggal_waktu}</strong></div>
+              <div class="text-secondary small mb-1"><i class="bi bi-geo-alt me-1 text-danger"></i> Lokasi: <strong>${k.lokasi}</strong></div>
+              <div class="text-secondary small mb-2"><i class="bi bi-house me-1 text-primary"></i> Tuan Rumah: <strong>${k.tuan_rumah}</strong></div>
+              <p class="text-secondary small mb-0">${k.deskripsi}</p>
+            </div>
+            ${parseInt(k.biaya) > 0 ? `
+            <div class="text-end">
+              <span class="badge bg-light text-dark border">Uang Kas / Arisan</span>
+              <div class="fw-bold text-success fs-6 mt-1">Rp ${parseInt(k.biaya).toLocaleString('id-ID')}</div>
+            </div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function submitRSVP() {
+      const data = {
+        id_kegiatan: document.getElementById('rsvpEventSelect').value,
+        nama_peserta: document.getElementById('rsvpNama').value.trim() || (currentUser ? currentUser.nama : "Keluarga"),
+        status_kehadiran: document.getElementById('rsvpStatus').value,
+        jumlah_keluarga: document.getElementById('rsvpJumlah').value,
+        catatan: document.getElementById('rsvpCatatan').value.trim()
+      };
+
+      if (!data.nama_peserta) return Swal.fire('Perhatian', 'Nama peserta harus diisi!', 'warning');
+
+      startLoading('Menyimpan konfirmasi kehadiran...');
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        setTimeout(() => {
+          db.pendaftaran.push(data);
+          endLoading();
+          Swal.fire('Terima Kasih', 'RSVP Anda berhasil disimpan (Mode Simulasi)!', 'success');
+        }, 300);
+      } else {
+        google.script.run
+          .withSuccessHandler(res => {
+            endLoading();
+            Swal.fire('Terima Kasih', 'Konfirmasi kehadiran berhasil dicatat di Spreadsheet!', 'success');
+          })
+          .withFailureHandler(err => {
+            endLoading();
+            Swal.fire('Error', err.toString(), 'error');
+          })
+          .savePendaftaran(data);
+      }
+    }
+
+    function spinArisan() {
+      const candidates = db.anggota.map(a => a.nama);
+      if (!candidates.length) return;
+      const box = document.getElementById('arisanWinnerBox');
+      let counter = 0;
+      const interval = setInterval(() => {
+        const rand = candidates[Math.floor(Math.random() * candidates.length)];
+        box.innerText = rand;
+        counter++;
+        if (counter > 20) {
+          clearInterval(interval);
+          const finalWinner = candidates[Math.floor(Math.random() * candidates.length)];
+          box.innerHTML = `<span class="badge bg-warning text-dark mb-1">Selamat!</span><br>${finalWinner}`;
+          Swal.fire('Arisan Terkocok!', `Pemenang Arisan Periode Ini: ${finalWinner}`, 'success');
+        }
+      }, 100);
+    }
+
+    function renderGaleri() {
+      const container = document.getElementById('galeriGrid');
+      container.innerHTML = db.galeri.map(g => `
+        <div class="col-md-6 col-lg-4">
+          <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+            <img src="${g.foto_url}" class="gallery-img" alt="${g.judul}">
+            <div class="card-body p-3">
+              <span class="badge bg-success-subtle text-success rounded-pill mb-1">${g.kategori}</span>
+              <h6 class="fw-bold text-dark mb-1">${g.judul}</h6>
+              <div class="text-muted small">Oleh: ${g.pengunggah} &bull; ${g.tanggal}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function submitGaleri() {
+      const fileInput = document.getElementById('inGaleriFile');
+      let photoUrl = document.getElementById('inGaleriUrl').value.trim();
+
+      startLoading('Mengunggah foto kenangan...');
+
+      try {
+        const uploadedUrl = await uploadImageAsync(fileInput);
+        if (uploadedUrl) photoUrl = uploadedUrl;
+      } catch (err) {
+        endLoading();
+        return Swal.fire('Gagal Upload', err, 'error');
+      }
+
+      if (!photoUrl) {
+        endLoading();
+        return Swal.fire('Perhatian', 'Pilih file foto dari komputer atau masukkan link URL!', 'warning');
+      }
+
+      const data = {
+        judul: document.getElementById('inGaleriJudul').value.trim(),
+        kategori: document.getElementById('inGaleriKategori').value,
+        foto_url: photoUrl,
+        pengunggah: currentUser ? currentUser.nama : "Keluarga"
+      };
+
+      bootstrap.Modal.getInstance(document.getElementById('modalAddGaleri')).hide();
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        setTimeout(() => {
+          data.id = "GAL-" + (db.galeri.length + 1);
+          data.tanggal = "Hari ini";
+          db.galeri.unshift(data);
+          renderGaleri();
+          endLoading();
+          Swal.fire('Berhasil', 'Foto berhasil ditambahkan (Simulasi)!', 'success');
+          document.getElementById('formAddGaleri').reset();
+        }, 300);
+      } else {
+        google.script.run
+          .withSuccessHandler(res => {
+            loadData();
+            Swal.fire('Berhasil', 'Foto berhasil disimpan ke Spreadsheet!', 'success');
+            document.getElementById('formAddGaleri').reset();
+          })
+          .withFailureHandler(err => {
+            endLoading();
+            Swal.fire('Error', err.toString(), 'error');
+          })
+          .saveGaleri(data);
+      }
+    }
+
+    function renderKomunitas() {
+      const container = document.getElementById('komunitasGrid');
+      container.innerHTML = db.komunitas.map(k => `
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="fw-bold text-dark mb-1">${k.nama_komunitas}</h5>
+              <span class="badge bg-light text-dark border">${k.jumlah_anggota} Anggota</span>
+            </div>
+            <p class="text-secondary small mb-3">${k.deskripsi}</p>
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+              <small class="text-muted">Koordinator: <strong>${k.ketua}</strong></small>
+              <button class="btn btn-outline-success btn-sm rounded-pill px-3" onclick="Swal.fire('Bergabung', 'Anda telah masuk ke grup koordinasi komunitas ini!', 'info')">
+                Ikut Bergabung
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderChat() {
+      const box = document.getElementById('chatMessages');
+      box.innerHTML = db.grupChat.map(c => {
+        const isMe = currentUser && c.nama_pengirim === currentUser.nama;
+        return `
+          <div class="chat-bubble ${isMe ? 'chat-right' : 'chat-left'}">
+            <div class="fw-bold small text-success">${c.nama_pengirim}</div>
+            <div>${c.pesan}</div>
+            <div class="text-end text-muted" style="font-size: 0.65rem;">${c.waktu}</div>
+          </div>
+        `;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendChat() {
+      const input = document.getElementById('chatInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const data = {
+        channel: "Umum",
+        nama_pengirim: currentUser ? currentUser.nama : "Keluarga",
+        pesan: val
+      };
+
+      input.value = '';
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        data.id = "C-" + (db.grupChat.length + 1);
+        data.waktu = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        db.grupChat.push(data);
+        renderChat();
+      } else {
+        data.waktu = "Baru saja";
+        db.grupChat.push(data);
+        renderChat();
+        google.script.run.saveChat(data);
+      }
+    }
+
+    function submitKegiatan() {
+      const form = {
+        nama_acara: document.getElementById('inAcaraNama').value.trim(),
+        tipe: document.getElementById('inAcaraTipe').value,
+        tanggal_waktu: document.getElementById('inAcaraWaktu').value.trim(),
+        lokasi: document.getElementById('inAcaraLokasi').value.trim(),
+        tuan_rumah: document.getElementById('inAcaraTuanRumah').value.trim(),
+        deskripsi: document.getElementById('inAcaraDeskripsi').value.trim(),
+        biaya: document.getElementById('inAcaraBiaya').value.trim()
+      };
+
+      bootstrap.Modal.getInstance(document.getElementById('modalAddKegiatan')).hide();
+      startLoading('Menyimpan jadwal agenda...');
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        setTimeout(() => {
+          form.id = "EVT-0" + (db.kegiatan.length + 1);
+          db.kegiatan.push(form);
+          renderKegiatan();
+          endLoading();
+          Swal.fire('Berhasil', 'Jadwal kegiatan tersimpan (Simulasi)!', 'success');
+          document.getElementById('formAddKegiatan').reset();
+        }, 300);
+      } else {
+        google.script.run
+          .withSuccessHandler(res => {
+            loadData();
+            Swal.fire('Berhasil', 'Jadwal berhasil ditambahkan!', 'success');
+            document.getElementById('formAddKegiatan').reset();
+          })
+          .withFailureHandler(err => {
+            endLoading();
+            Swal.fire('Error', err.toString(), 'error');
+          })
+          .saveKegiatan(form);
+      }
+    }
+
+    function switchView(viewName, btn) {
+      ['silsilah', 'tree', 'feed', 'kegiatan', 'galeri', 'komunitas', 'chat'].forEach(v => {
+        const el = document.getElementById('view-' + v);
+        if (el) el.style.display = (v === viewName) ? 'block' : 'none';
+      });
+      document.querySelectorAll('#familyTabs .nav-link').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    window.addEventListener('load', () => {
+      const saved = getItemSafe('trah_user');
+      if (saved) {
+        try {
+          const u = JSON.parse(saved);
+          onLoginSuccess(u);
+        } catch (e) {
+          logoutUser();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
